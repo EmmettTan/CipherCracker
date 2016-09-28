@@ -116,23 +116,36 @@ class Playfair
 
     def perform_row_swap
         random_row1 = rand(0..4)
-        random_row2 = random(0..4)
+        random_row2 = rand(0..4)
         while(random_row2 == random_row1)
-            random_row2 = random(0..4)
+            random_row2 = rand(0..4)
         end
-        row1_buffer = key_table[random_row1]
-        row2_buffer = key_table[random_row2]
+        row1_buffer = key_table[random_row1].dup
+        row2_buffer = key_table[random_row2].dup
         
         for i in 0..4
             key_table[random_row2][i] = row1_buffer[i]
-            key_lookup[key_table[[random_row2][i]]] = [random_row2, i]
+            key_lookup[key_table[random_row2][i]] = [random_row2, i]
             key_table[random_row1][i] = row2_buffer[i]
-            key_lookup[key_table[[random_row1][i]]] = [random_row1, i]
+            key_lookup[key_table[random_row1][i]] = [random_row1, i]
         end
     end
 
-    def perform_column_swap
-
+    def perform_col_swap
+        random_col1 = rand(0..4)
+        random_col2 = rand(0..4)
+        while(random_col2 == random_col1)
+            random_col2 = rand(0..4)
+        end
+        col1_buffer = key_table.transpose[random_col1].dup
+        col2_buffer = key_table.transpose[random_col2].dup
+        
+        for i in 0..4
+            key_table[i][random_col2] = col1_buffer[i]
+            key_lookup[key_table[i][random_col2]] = [i, random_col2]
+            key_table[i][random_col1] = col2_buffer[i]
+            key_lookup[key_table[i][random_col1]] = [i, random_col1]
+        end
     end
 
     def perform_letter_swap
@@ -187,7 +200,20 @@ class Playfair
     attr_reader :parent_score
     attr_reader :child_score
     attr_reader :key_lookup
+
+    def print_key_table
+        for i in 0..4
+            for j in 0..4
+                print @key_table[i][j]
+            end
+            puts ""
+        end
+    end
+
 end
 
 playfair = Playfair.new(ARGV[0], ARGV[1])
-puts playfair.decrypt_ciphertext
+playfair.perform_col_swap
+puts ""
+playfair.print_key_table
+puts playfair.key_lookup
