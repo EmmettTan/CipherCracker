@@ -15,9 +15,9 @@ class Score
     def score(input)
         final_score = 0
         quadgraphArr = input.scan(/.{4}/)
-        puts "==========================="
-        puts "Scoring input: #{input}"
-        puts "==========================="
+        #puts "==========================="
+        #puts "Scoring input: #{input}"
+        #puts "==========================="
         quadgraphArr.each { |str|
             if (@freqhash.has_key?(str.upcase))
                 str_score = Math.log(@freqhash[str.upcase]/@score_sum.to_f)

@@ -1,11 +1,10 @@
 STDOUT.sync = true
-require_relative 'score'
     
 class Playfair
     def initialize(key, ciphertext)
         @ciphertext = ciphertext
-        @parent_score = -(Float::INFINITY)
-        @child_score = -(Float::INFINITY)
+        #@parent_score = -Float::INFINITY
+        #@child_score = -Float::INFINITY
         @cipherPairs = ciphertext.scan(/.{2}/)
         init_key_table(key)
     end
@@ -21,7 +20,6 @@ class Playfair
     def translate_pair(str)
         c1 = str[0]
         c2 = str[1]
-
         pos1 = [@key_lookup[c1][0], @key_lookup[c1][1]]
         pos2 = [@key_lookup[c2][0], @key_lookup[c2][1]]
 
@@ -39,6 +37,7 @@ class Playfair
             return pair_rectangle_shift(str)
         end            
     end
+
 
     def pair_row_shift(str) 
         res = ""
@@ -96,7 +95,7 @@ class Playfair
         when 3
             perform_row_swap
         when 4
-            perform_column_swap
+            perform_col_swap
         else
             perform_letter_swap
         end
@@ -152,9 +151,9 @@ class Playfair
         row2_buffer = @key_table[random_row2].dup
         
         for i in 0..4
-            @key_table[@random_row2][i] = row1_buffer[i]
+            @key_table[random_row2][i] = row1_buffer[i]
             @key_lookup[@key_table[random_row2][i]] = [random_row2, i]
-            @key_table[@random_row1][i] = row2_buffer[i]
+            @key_table[random_row1][i] = row2_buffer[i]
             @key_lookup[@key_table[random_row1][i]] = [random_row1, i]
         end
     end
@@ -191,6 +190,19 @@ class Playfair
 
         @key_lookup[letter1] = rand_pos2
         @key_lookup[letter2] = rand_pos1
+    end
+
+    def reinitialize_key_lookup
+        for i in 0..4
+            for j in 0..4
+                @key_lookup[@key_table[i][j]] = [i,j]
+            end
+        end
+    end
+
+    def reinitialize_key_table(table)
+        @key_table = table
+        reinitialize_key_lookup
     end
 
     def init_key_table(key)
@@ -253,8 +265,9 @@ class Playfair
 
 end
 
-playfair = Playfair.new(ARGV[0], ARGV[1])
-playfair.perform_letter_swap
-puts ""
-playfair.print_key_table
-puts playfair.key_lookup
+if (false)
+    ciphertext = File.read('cipher2.txt')
+    key = "SPXUWGENFDOQMTRKCBAHVYZLI"
+    playfair = Playfair.new(key, ciphertext)
+    puts playfair.decrypt_ciphertext
+end

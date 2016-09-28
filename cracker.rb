@@ -1,95 +1,66 @@
 STDOUT.sync = true
-freqmap = Hash.new
-difreqmap = Hash.new
-trifreqmap = Hash.new
-quadfreqmap = Hash.new
-ciphermap = Hash.new
-("a".."z").each { |letter|
-    freqmap[letter] = 0
-}
+require_relative 'playfair'
+require_relative 'score'
 
-secretMsg = File.read("cipher2.txt")
-
-puts "==============================="
-puts secretMsg
-puts "==============================="
-digraphArr = secretMsg.scan(/.{2}/)
-trigraphArr = secretMsg.scan(/.{3}/)
-quadgraphArr = secretMsg.scan(/.{4}/)
-
-
-# Create single letter frequency chart 
-msgChars = secretMsg.split('')
-msgChars.each { |c|
-    if freqmap.has_key?(c.downcase)
-        freqmap[c.downcase] = freqmap[c.downcase] + 1
+class Cracker
+    def initialize
+        @counter = 0
+        #@ciphertext = "test"
+        @ciphertext = File.read('cipher2.txt')
+        @temperature = 10 + 0.087*(@ciphertext.length-84)
+        @key = generate_key
+        @playfair = Playfair.new(@key, @ciphertext.upcase)
+        @scorer = Score.new
+        @parent_score = -(Float::INFINITY)
+        @child_score = -(Float::INFINITY)
+        solve
     end
-}
 
-digraphArr.each { |str|
-    if difreqmap.has_key?(str.downcase)
-        difreqmap[str.downcase] = difreqmap[str.downcase] + 1
-    else
-        difreqmap[str.downcase] = 1
+    def solve
+        while 1
+            plaintext = @playfair.decrypt_ciphertext
+            @child_score = @scorer.score(plaintext)
+            puts "================================="
+            #puts plaintext
+            puts "Current Score: #{@parent_score}"
+            puts "Child Score: #{@child_score}"
+            if @child_score >= @parent_score
+                @parent_score = @child_score
+                @best_table = @playfair.key_table
+            else
+                random_float = rand()
+                probability = 1.0/(Math::E**((@parent_score-@child_score)/@temperature))
+                if probability >= random_float
+                    puts "#{probability} > #{random_float}"
+                    @parent_score = @child_score
+                    @best_table = @playfair.key_table
+                else
+                    @playfair.reinitialize_key_table(@best_table)
+                end
+            end
+            print_best
+            @playfair.change_key_table(rand(0..50))
+            @counter += 1
+        end
     end
-}
 
-trigraphArr.each { |str|
-    if trifreqmap.has_key?(str.downcase)
-        trifreqmap[str.downcase] = trifreqmap[str.downcase] + 1
-    else
-        trifreqmap[str.downcase] = 1
+    def generate_key
+        key = ""
+        alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+        while !alphabet.empty?
+            randNum = rand(0..alphabet.length-1)
+            key << alphabet.slice!(randNum)
+        end
+        return key.upcase
     end
-}
 
-
-quadgraphArr.each { |str|
-    if quadfreqmap.has_key?(str.downcase)
-        quadfreqmap[str.downcase] = quadfreqmap[str.downcase] + 1
-    else
-        quadfreqmap[str.downcase] = 1
+    def print_best
+        for i in 0..4
+            for j in 0..4
+                print @best_table[i][j]
+            end
+            puts ""
+        end
     end
-}
-
-
-
-#puts freqmap
-#puts difreqmap.sort_by {|k,v| v}.reverse
-#puts trifreqmap.sort_by {|k,v| v}.reverse
-#puts quadfreqmap.sort_by {|k,v| v}.reverse
-
-ciphermap["rn"] = "co"
-ciphermap["sa"] = "mx"
-ciphermap["te"] = "ma"
-ciphermap["ne"] = "th"
-ciphermap["vg"] = "er"
-ciphermap["eg"] = "at"
-ciphermap["zh"] = "he"
-ciphermap["vn"] = "ho"
-ciphermap["ed"] = "ha"
-ciphermap["my"] = "sg"
-ciphermap["qf"] = "iv"
-ciphermap["ht"] = "en"
-ciphermap["tq"] = "of"
-ciphermap["th"] = "ne"
-ciphermap["o"] = "*"
-ciphermap["p"] = "*"
-ciphermap["q"] = "*"
-ciphermap["r"] = "*"
-ciphermap["s"] = "*"
-ciphermap["t"] = "*"
-ciphermap["u"] = "*"
-ciphermap["v"] = "*"
-ciphermap["w"] = "*"
-ciphermap["x"] = "*"
-ciphermap["y"] = "*"
-ciphermap["z"] = "*"
-
-
-digraphArr.each { |str|
-    if ciphermap[str.downcase] != nil
-        print ciphermap[str.downcase]
-    else
-        print "**"
-    end
-}
+end
+cracker = Cracker.new
