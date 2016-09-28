@@ -103,15 +103,43 @@ class Playfair
     end
 
     def perform_diagonal_flip
-
+        for i in 0..4
+            for j in i..4
+                letter1 = @key_table[i][j].dup
+                letter2 = @key_table[j][i].dup
+                @key_table[i][j] = letter2
+                @key_table[j][i] = letter1
+            end
+        end
+        for i in 0..4
+            for j in 0..4
+                @key_lookup[@key_table[i][j]] = [i,j]
+            end
+        end
     end
 
     def perform_vertical_flip
-
+        flipped = @key_table.transpose
+        @key_table = flipped
+        for i in 0..4
+            @key_table[i] = @key_table[i].reverse
+        end
+        flipped = @key_table.transpose
+        @key_table = flipped
+        for i in 0..4
+            for j in 0..4
+                @key_lookup[@key_table[i][j]] = [i,j]
+            end
+        end
     end
 
     def perform_horizontal_flip
-
+        for i in 0..4
+            @key_table[i] = @key_table[i].reverse
+            for j in 0..4
+                @key_lookup[@key_table[i][j]] = [i,j]
+            end
+        end
     end
 
     def perform_row_swap
@@ -120,14 +148,14 @@ class Playfair
         while(random_row2 == random_row1)
             random_row2 = rand(0..4)
         end
-        row1_buffer = key_table[random_row1].dup
-        row2_buffer = key_table[random_row2].dup
+        row1_buffer = @key_table[random_row1].dup
+        row2_buffer = @key_table[random_row2].dup
         
         for i in 0..4
-            key_table[random_row2][i] = row1_buffer[i]
-            key_lookup[key_table[random_row2][i]] = [random_row2, i]
-            key_table[random_row1][i] = row2_buffer[i]
-            key_lookup[key_table[random_row1][i]] = [random_row1, i]
+            @key_table[@random_row2][i] = row1_buffer[i]
+            @key_lookup[@key_table[random_row2][i]] = [random_row2, i]
+            @key_table[@random_row1][i] = row2_buffer[i]
+            @key_lookup[@key_table[random_row1][i]] = [random_row1, i]
         end
     end
 
@@ -137,19 +165,32 @@ class Playfair
         while(random_col2 == random_col1)
             random_col2 = rand(0..4)
         end
-        col1_buffer = key_table.transpose[random_col1].dup
-        col2_buffer = key_table.transpose[random_col2].dup
+        col1_buffer = @key_table.transpose[random_col1].dup
+        col2_buffer = @key_table.transpose[random_col2].dup
         
         for i in 0..4
-            key_table[i][random_col2] = col1_buffer[i]
-            key_lookup[key_table[i][random_col2]] = [i, random_col2]
-            key_table[i][random_col1] = col2_buffer[i]
-            key_lookup[key_table[i][random_col1]] = [i, random_col1]
+            @key_table[i][random_col2] = col1_buffer[i]
+            @key_lookup[@key_table[i][random_col2]] = [i, random_col2]
+            @key_table[i][random_col1] = col2_buffer[i]
+            @key_lookup[@key_table[i][random_col1]] = [i, random_col1]
         end
     end
 
     def perform_letter_swap
+        rand_pos1 = [rand(0..4), rand(0..4)]
+        rand_pos2 = [rand(0..4), rand(0..4)]
+        while rand_pos2[0] == rand_pos1[0] && rand_pos2[1] == rand_pos1[1]
+            rand_pos2 = [rand(0..4), rand(0..4)]
+        end
+        
+        letter1 = @key_table[rand_pos1[0]][rand_pos1[1]]
+        letter2 = @key_table[rand_pos2[0]][rand_pos2[1]]
+        
+        @key_table[rand_pos1[0]][rand_pos1[1]] = letter2
+        @key_table[rand_pos2[0]][rand_pos2[1]] = letter1
 
+        @key_lookup[letter1] = rand_pos2
+        @key_lookup[letter2] = rand_pos1
     end
 
     def init_key_table(key)
@@ -213,7 +254,7 @@ class Playfair
 end
 
 playfair = Playfair.new(ARGV[0], ARGV[1])
-playfair.perform_col_swap
+playfair.perform_letter_swap
 puts ""
 playfair.print_key_table
 puts playfair.key_lookup
