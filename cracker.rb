@@ -4,10 +4,11 @@ require_relative 'score'
 
 class Cracker
     def initialize
-        @counter = 0
+        @counter = 0.0
+        @flips = 0.0
         #@ciphertext = "test"
         @ciphertext = File.read('cipher2.txt')
-        @temperature = 10 + 0.087*(@ciphertext.length-84)
+        @temperature = 50
         @key = generate_key
         @playfair = Playfair.new(@key, @ciphertext.upcase)
         @scorer = Score.new
@@ -24,22 +25,24 @@ class Cracker
             #puts plaintext
             puts "Current Score: #{@parent_score}"
             puts "Child Score: #{@child_score}"
+            probability = 1.0/(Math::E**((@parent_score-@child_score)/@temperature))
+            puts "Probability: #{probability}"
             if @child_score >= @parent_score
                 @parent_score = @child_score
                 @best_table = @playfair.key_table
             else
                 random_float = rand()
-                probability = 1.0/(Math::E**((@parent_score-@child_score)/@temperature))
                 if probability >= random_float
-                    puts "#{probability} > #{random_float}"
                     @parent_score = @child_score
                     @best_table = @playfair.key_table
+                    @flips += 1
                 else
                     @playfair.reinitialize_key_table(@best_table)
                 end
             end
             print_best
             @playfair.change_key_table(rand(0..50))
+            puts @flips/@counter
             @counter += 1
         end
     end

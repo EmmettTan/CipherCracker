@@ -267,7 +267,7 @@ end
 
 if (false)
     ciphertext = File.read('cipher2.txt')
-    key = "SPXUWGENFDOQMTRKCBAHVYZLI"
+    key = "TLDBNKYAPZSWCFQVIUGHXOMER"
     playfair = Playfair.new(key, ciphertext)
     puts playfair.decrypt_ciphertext
 end
