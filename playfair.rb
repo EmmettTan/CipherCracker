@@ -84,7 +84,7 @@ class Playfair
     end
 
     def change_key_table(number)
-        random_number = rand(0..8)
+        random_number = rand(0..30)
         case random_number
         when 0
             perform_diagonal_flip
@@ -206,7 +206,7 @@ class Playfair
     end
 
     def reinitialize_key_table(table)
-        @key_table = table
+        @key_table = table.dup
         reinitialize_key_lookup
     end
 
@@ -270,9 +270,12 @@ class Playfair
 
 end
 
-if (false)
-    ciphertext = File.read('cipher2.txt')
-    key = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
-    change_key_table(0)
-    print_key_table
+if (true)
+    ciphertext = "BMODZBXDNABEKUDMUIXMMOUVIF"
+    key = "PLAYFAIREXAMPLE"
+    playfair = Playfair.new(key, ciphertext)
+    playfair.change_key_table(0)
+    puts "================"
+    playfair.print_key_table
+    puts playfair.key_lookup
 end

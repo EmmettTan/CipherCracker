@@ -8,7 +8,7 @@ class Cracker
         @flips = 0.0
         #@ciphertext = "test"
         @ciphertext = File.read('cipher2.txt')
-        @temperature = 50
+        @temperature = 50.0
         @key = generate_key
         @playfair = Playfair.new(@key, @ciphertext.upcase)
         @scorer = Score.new
