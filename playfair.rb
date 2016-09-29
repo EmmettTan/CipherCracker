@@ -84,7 +84,7 @@ class Playfair
     end
 
     def change_key_table(number)
-        random_number = rand(0..50)
+        random_number = rand(0..8)
         case random_number
         when 0
             perform_diagonal_flip
@@ -115,6 +115,7 @@ class Playfair
                 @key_lookup[@key_table[i][j]] = [i,j]
             end
         end
+        reinitialize_key_lookup
     end
 
     def perform_vertical_flip
@@ -130,6 +131,7 @@ class Playfair
                 @key_lookup[@key_table[i][j]] = [i,j]
             end
         end
+        reinitialize_key_lookup
     end
 
     def perform_horizontal_flip
@@ -139,6 +141,7 @@ class Playfair
                 @key_lookup[@key_table[i][j]] = [i,j]
             end
         end
+        reinitialize_key_lookup
     end
 
     def perform_row_swap
@@ -156,6 +159,7 @@ class Playfair
             @key_table[random_row1][i] = row2_buffer[i]
             @key_lookup[@key_table[random_row1][i]] = [random_row1, i]
         end
+        reinitialize_key_lookup
     end
 
     def perform_col_swap
@@ -173,6 +177,7 @@ class Playfair
             @key_table[i][random_col1] = col2_buffer[i]
             @key_lookup[@key_table[i][random_col1]] = [i, random_col1]
         end
+        reinitialize_key_lookup
     end
 
     def perform_letter_swap
@@ -188,8 +193,8 @@ class Playfair
         @key_table[rand_pos1[0]][rand_pos1[1]] = letter2
         @key_table[rand_pos2[0]][rand_pos2[1]] = letter1
 
-        @key_lookup[letter1] = rand_pos2
-        @key_lookup[letter2] = rand_pos1
+        reinitialize_key_lookup
+
     end
 
     def reinitialize_key_lookup
@@ -267,7 +272,7 @@ end
 
 if (false)
     ciphertext = File.read('cipher2.txt')
-    key = "TLDBNKYAPZSWCFQVIUGHXOMER"
-    playfair = Playfair.new(key, ciphertext)
-    puts playfair.decrypt_ciphertext
+    key = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+    change_key_table(0)
+    print_key_table
 end

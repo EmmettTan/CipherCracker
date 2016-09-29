@@ -21,29 +21,30 @@ class Cracker
         while 1
             plaintext = @playfair.decrypt_ciphertext
             @child_score = @scorer.score(plaintext)
-            puts "================================="
             #puts plaintext
-            puts "Current Score: #{@parent_score}"
-            puts "Child Score: #{@child_score}"
-            probability = 1.0/(Math::E**((@parent_score-@child_score)/@temperature))
-            puts "Probability: #{probability}"
             if @child_score >= @parent_score
+                puts "================================="
+                puts "Current Score: #{@parent_score}"
                 @parent_score = @child_score
-                @best_table = @playfair.key_table
+                @best_table = @playfair.key_table.dup
+                puts "Child Score: #{@child_score}"
+                print_best
             else
+                probability = 1.0/(Math::E**((@parent_score-@child_score)/@temperature))
                 random_float = rand()
                 if probability >= random_float
                     @parent_score = @child_score
                     @best_table = @playfair.key_table
-                    @flips += 1
+                    puts "================================="
+                    puts "Current Score: #{@parent_score}"
+                    puts "Child Score: #{@child_score}"
+                    puts "Probability: #{probability}"
+                    print_best
                 else
                     @playfair.reinitialize_key_table(@best_table)
                 end
             end
-            print_best
             @playfair.change_key_table(rand(0..50))
-            puts @flips/@counter
-            @counter += 1
         end
     end
 
